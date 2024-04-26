@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ML Model Web Page</title>
+</head>
+<body>
+    <h1>ML Model Web Page</h1>
+    <form id="mlForm">
+        <label for="symptoms">Symptoms:</label><br>
+        <input type="text" id="symptoms" name="symptoms" required><br>
+        
+        <label for="age">Age:</label><br>
+        <input type="number" id="age" name="age" required><br>
+        
+        <label for="sex">Sex:</label><br>
+        <select id="sex" name="sex" required>
+            <option value="male">Male</option>
+            <option value="female">Female</option>
+        </select><br>
+        
+        <label for="disease">Disease:</label><br>
+        <input type="text" id="disease" name="disease" required><br>
+        
+        <label for="nature">Nature:</label><br>
+        <input type="text" id="nature" name="nature" required><br>
+        
+        <button type="submit">Get Recommendation</button>
+    </form>
+
+    <div id="result"></div>
+
+    <script>
+        document.getElementById("mlForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+
+            var symptoms = document.getElementById("symptoms").value;
+            var age = document.getElementById("age").value;
+            var sex = document.getElementById("sex").value;
+            var disease = document.getElementById("disease").value;
+            var nature = document.getElementById("nature").value;
+
+            var data = {
+                "input_data": {
+                    "columns": ["Symptoms", "Age", "Sex", "Disease", "Nature"],
+                    "index": [0],
+                    "data": [[symptoms, age, sex, disease, nature]]
+                }
+            };
+
+            var xhr = new XMLHttpRequest();
+            var url = 'https://ml-adesina-workspace-btmgy.eastus.inference.ml.azure.com/score';
+            var apiKey = '9nPKQKzOuVXts154OHMID5xGbc5fVWjO';
+            xhr.open("POST", url, true);
+            xhr.setRequestHeader("Content-Type", "application/json");
+            xhr.setRequestHeader("Authorization", "Bearer " + apiKey);
+            xhr.setRequestHeader("azureml-model-deployment", "treatment-recommender-model-1-1");
+
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4) {
+                    if (xhr.status === 200) {
+                        var result = JSON.parse(xhr.responseText);
+                        document.getElementById("result").innerHTML = JSON.stringify(result);
+                    } else {
+                        console.error("Request failed with status code: " + xhr.status);
+                    }
+                }
+            };
+
+            xhr.send(JSON.stringify(data));
+        });
+    </script>
+</body>
+</html>
